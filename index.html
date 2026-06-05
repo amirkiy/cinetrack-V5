@@ -7,16 +7,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-main: #0a0a0a;
-      --bg-surface: #141414;
-      --bg-card: #1f1f1f;
-      --bg-glass: rgba(20, 20, 20, 0.75);
-      --accent: #e50914;
-      --accent-hover: #b80710;
-      --text-main: #ffffff;
-      --text-muted: #aaaaaa;
-      --border: rgba(255, 255, 255, 0.1);
-      --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      --bg-main: #f4f6f8;
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-glass: rgba(255,255,255,0.85);
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border: rgba(0,0,0,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
       --cyan: #00bcd4;
       --green: #2e7d32;
       --blue: #1a237e;
@@ -330,6 +330,14 @@
       </div>
 
       <div class="form-group">
+        <label>Language / زبان:</label>
+        <select id="languageSelect" class="form-control">
+          <option value="fa">فارسی</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label>OpenRouter API Key:</label>
         <input type="password" id="openRouterKeyInput" class="form-control" placeholder="sk-or-v1-...">
       </div>
@@ -363,6 +371,11 @@
   </div>
 
   <script>
+    // Professionalization patch v1:
+    // - Language selector foundation added
+    // - Light theme foundation added
+    // - Archive matching system intentionally untouched
+    // - Ready for future OpenRouter Persian plot translation integration
     const OMDB_KEY = "4b0254f3";
 
     let state = {
@@ -372,7 +385,8 @@
       sortBy: 'dateAdded',
       globalAiCache: localStorage.getItem("cinetrack_global_ai_cache") || "",
       archiveHtmlSource: localStorage.getItem("cinetrack_archive_html_raw") || "",
-      audioReviews: JSON.parse(localStorage.getItem("cinetrack_audio_reviews") || "{}")
+      audioReviews: JSON.parse(localStorage.getItem("cinetrack_audio_reviews") || "{}"),
+      language: localStorage.getItem("cinetrack_language") || "fa"
     };
 
     let searchDebounceTimer;
@@ -390,6 +404,7 @@
       initSpeechRecognition();
 
       document.getElementById("openRouterKeyInput").value = localStorage.getItem("cinetrack_or_key") || "";
+      document.getElementById("languageSelect").value = state.language;
       
       if (state.archiveHtmlSource) {
         document.getElementById("archiveUploadStatus").innerText = "✅ فایل آرشیو با موفقیت بارگذاری شده و آماده پردازش هوشمند است.";
@@ -650,6 +665,7 @@
     }
 
     function confirmAddItem(omdbData) {
+      // TODO: future enhancement: fetch full OMDb details by imdbID so Plot, Director, Actors and Runtime are always populated.
       if (state.items.some(i => i.imdbID === omdbData.imdbID)) {
         alert("این عنوان قبلاً به آرشیو شما اضافه شده است!");
         closeModal('addModal');
@@ -1257,6 +1273,8 @@
 
       localStorage.setItem("cinetrack_or_key", key);
       localStorage.setItem("cinetrack_or_model", finalModel);
+      state.language = document.getElementById("languageSelect").value;
+      localStorage.setItem("cinetrack_language", state.language);
       
       alert("تنظیمات با موفقیت ذخیره شد.");
       closeModal('settingsModal');
