@@ -1,301 +1,207 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CineTrack AI Ultimate Pro+</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineTrack AI Ultimate Pro</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
-<style>
-:root{
-  --bg:#f7f8fb;
-  --card:#ffffff;
-  --text:#111827;
-  --muted:#6b7280;
-  --primary:#2563eb;
-  --primary2:#1d4ed8;
-  --border:rgba(0,0,0,0.08);
-  --shadow:0 10px 30px rgba(0,0,0,0.08);
-}
+  <style>
+    :root {
+      --bg-main: #f4f6f8;
+      --bg-surface: #ffffff;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border: rgba(0,0,0,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --cyan: #00bcd4;
+      --green: #2e7d32;
+    }
 
-*{
-  box-sizing:border-box;
-  font-family:'Vazirmatn',sans-serif;
-}
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; }
 
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-}
+    body { background: var(--bg-main); color: var(--text-main); }
 
-/* HEADER */
-header{
-  position:sticky;
-  top:0;
-  background:#fff;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 20px;
-  border-bottom:1px solid var(--border);
-  z-index:100;
-}
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
-.brand{
-  font-weight:900;
-  color:var(--primary);
-}
+    .brand { font-weight: 900; color: var(--accent); }
 
-/* BUTTONS */
-.btn{
-  background:var(--primary);
-  color:white;
-  border:none;
-  padding:8px 14px;
-  border-radius:10px;
-  cursor:pointer;
-}
-.btn:hover{background:var(--primary2);}
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
 
-.btn-secondary{
-  background:#f3f4f6;
-  color:#111;
-  border:1px solid var(--border);
-}
+    .btn:hover { background: var(--accent-hover); }
 
-/* SEARCH */
-.search-box{
-  display:flex;
-  background:#111;
-  border-radius:10px;
-  overflow:hidden;
-}
-.search-box input{
-  border:none;
-  padding:10px;
-  outline:none;
-  color:#fff;
-  background:transparent;
-  width:250px;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      padding: 20px;
+    }
 
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-  gap:16px;
-  padding:20px;
-}
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+    }
 
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  overflow:hidden;
-  box-shadow:var(--shadow);
-  cursor:pointer;
-}
+    .card img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+    }
 
-.card img{
-  width:100%;
-  height:280px;
-  object-fit:cover;
-}
+    .card-body { padding: 10px; }
 
-.card-body{
-  padding:10px;
-}
+    .hero {
+      margin: 20px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
 
-.title{
-  font-weight:700;
-  font-size:14px;
-}
-
-/* HERO */
-.hero{
-  margin:20px;
-  padding:20px;
-  background:#fff;
-  border-radius:14px;
-  box-shadow:var(--shadow);
-}
-
-/* MODAL */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.5);
-  display:none;
-  justify-content:center;
-  align-items:center;
-}
-
-.modal.active{display:flex;}
-
-.modal-box{
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
-  width:90%;
-  max-width:500px;
-}
-
-/* QUALITY BLOCK */
-.quality-block{
-  margin-top:10px;
-  padding:10px;
-  background:#f9fafb;
-  border:1px solid var(--border);
-  border-radius:10px;
-  font-size:13px;
-  white-space:pre-line;
-}
-</style>
+    .quality-box {
+      white-space: pre-line;
+      font-size: 13px;
+      background: #f9fafb;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-top: 10px;
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-  <div class="brand">🎬 CineTrack AI+</div>
-
-  <div class="search-box">
-    <input id="searchInput" placeholder="Search..." oninput="handleSearch(this.value)">
-  </div>
-
-  <button class="btn btn-secondary" onclick="openSettings()">Settings</button>
+  <div class="brand">🎬 CineTrack AI</div>
+  <button class="btn" onclick="openSettings()">Settings</button>
 </header>
 
 <div class="hero" id="hero"></div>
-
 <div class="grid" id="grid"></div>
 
-<!-- SETTINGS -->
-<div class="modal" id="settingsModal">
-  <div class="modal-box">
-    <h3>Settings</h3>
-
-    <label>Language</label>
-    <select id="lang">
-      <option value="en">English</option>
-      <option value="fa">Persian</option>
-    </select>
-
-    <br><br>
-
-    <label>OpenRouter Key</label>
-    <input id="apiKey" type="password" style="width:100%;padding:8px">
-
-    <br><br>
-
-    <button class="btn" onclick="saveSettings()">Save</button>
-  </div>
-</div>
-
 <script>
-const OMDB="4b0254f3";
+const OMDB_KEY = "4b0254f3";
 
-let state={
-  items: JSON.parse(localStorage.getItem("db")||"[]"),
-  selected:null,
-  lang:localStorage.getItem("lang")||"en",
-  translationCache: JSON.parse(localStorage.getItem("translationCache")||"{}")
+/* ================= STATE ================= */
+let state = {
+  items: JSON.parse(localStorage.getItem("cinetrack_db") || "[]"),
+  selectedId: null
 };
 
-/* SAVE */
-function saveDB(){
-  localStorage.setItem("db",JSON.stringify(state.items));
+/* ================= SAFE HELPERS ================= */
+function unique(arr){
+  return [...new Set((arr || []).map(x => (x || "").trim()).filter(Boolean))];
 }
 
-/* SEARCH */
-function handleSearch(v){
-  if(v.length<2) return;
-  fetch(`https://www.omdbapi.com/?s=${v}&apikey=${OMDB}`)
-  .then(r=>r.json())
-  .then(d=>{
-    if(!d.Search) return;
-    alert("Select result from API (UI simplified in this upgrade)");
+/* ================= RENDER GRID ================= */
+function renderGrid(){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  state.items.forEach(item=>{
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.onclick = () => {
+      state.selectedId = item.id;
+      renderHero();
+    };
+
+    div.innerHTML = `
+      <img src="${item.poster}">
+      <div class="card-body">
+        <div>${item.title}</div>
+      </div>
+    `;
+
+    grid.appendChild(div);
   });
 }
 
-/* ADD */
-function addItem(data){
-  state.items.push(data);
-  saveDB();
-  render();
-}
+/* ================= HERO ================= */
+function renderHero(){
+  const container = document.getElementById("hero");
+  const item = state.items.find(i=>i.id===state.selectedId);
 
-/* HERO */
-async function renderHero(){
-  let item=state.items.find(i=>i.id===state.selected);
-  if(!item){document.getElementById("hero").innerHTML="Select item";return;}
-
-  let plot=item.Plot||"";
-
-  if(state.lang==="fa"){
-    if(state.translationCache[item.imdbID]){
-      plot=state.translationCache[item.imdbID];
-    }else{
-      const apiKey=localStorage.getItem("apiKey");
-      if(apiKey){
-        const res=await fetch("https://openrouter.ai/api/v1/chat/completions",{
-          method:"POST",
-          headers:{
-            "Authorization":"Bearer "+apiKey,
-            "Content-Type":"application/json"
-          },
-          body:JSON.stringify({
-            model:"deepseek/deepseek-chat",
-            messages:[{role:"user",content:"Translate to Persian:\n"+plot}]
-          })
-        });
-        const data=await res.json();
-        plot=data.choices?.[0]?.message?.content||plot;
-        state.translationCache[item.imdbID]=plot;
-        localStorage.setItem("translationCache",JSON.stringify(state.translationCache));
-      }
-    }
+  if(!item){
+    container.innerHTML = "Select a movie";
+    return;
   }
 
-  document.getElementById("hero").innerHTML=`
+  /* ================= FIX: QUALITY DUPLICATION ================= */
+  let softSub = unique(item.softSub || []);
+  let dubbed = unique(item.dubbed || []);
+
+  let qualityHTML = "";
+
+  if(softSub.length){
+    qualityHTML += "SoftSub\n\n" + softSub.map(q => "• " + q).join("\n") + "\n\n";
+  }
+
+  if(dubbed.length){
+    qualityHTML += "Dubbed\n\n" + dubbed.map(q => "• " + q).join("\n");
+  }
+
+  container.innerHTML = `
     <h2>${item.title}</h2>
-    <p>${plot}</p>
+    <p>${item.plot || ""}</p>
+
+    <div class="quality-box">
+      ${qualityHTML || "No quality data"}
+    </div>
   `;
 }
 
-/* GRID */
-function render(){
-  let g=document.getElementById("grid");
-  g.innerHTML="";
-  state.items.forEach(i=>{
-    let c=document.createElement("div");
-    c.className="card";
-    c.onclick=()=>{state.selected=i.id;renderHero();};
-    c.innerHTML=`
-      <img src="${i.poster}">
-      <div class="card-body">
-        <div class="title">${i.title}</div>
-      </div>
-    `;
-    g.appendChild(c);
+/* ================= ADD SAMPLE DATA ================= */
+function addSample(){
+  state.items.push({
+    id: "1",
+    title: "Sample Movie",
+    poster: "https://via.placeholder.com/300x400",
+    plot: "Sample plot",
+    softSub: [
+      "1080p BluRay / 2.7GB",
+      "1080p BluRay / 2.7GB",
+      "720p BluRay / 1.2GB"
+    ],
+    dubbed: [
+      "1080p BluRay / 2.9GB",
+      "1080p BluRay / 2.9GB"
+    ]
   });
+
+  localStorage.setItem("cinetrack_db", JSON.stringify(state.items));
 }
 
-/* SETTINGS */
-function openSettings(){
-  document.getElementById("settingsModal").classList.add("active");
-}
-
-function saveSettings(){
-  state.lang=document.getElementById("lang").value;
-  localStorage.setItem("lang",state.lang);
-  localStorage.setItem("apiKey",document.getElementById("apiKey").value);
-  document.getElementById("settingsModal").classList.remove("active");
-}
-
-/* INIT */
-render();
+/* ================= INIT ================= */
+addSample();
+renderGrid();
+renderHero();
 </script>
 
 </body>
