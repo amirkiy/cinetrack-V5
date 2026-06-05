@@ -3,179 +3,144 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CineTrack AI Ultimate - Premium Platform</title>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <title>CineTrack Premium Engine v2.0</title>
   <style>
     :root {
-      --bg-main: #0a0a0a; --bg-surface: #141414; --bg-card: #1f1f1f;
-      --accent: #e50914; --accent-hover: #b80710;
-      --text-main: #ffffff; --text-muted: #aaaaaa;
-      --border: rgba(255, 255, 255, 0.1); --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      --primary: #e50914; --bg: #0a0a0a; --surface: #121212;
+      --text: #ffffff; --muted: #aaaaaa; --border: #333;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; }
-    body { background-color: var(--bg-main); color: var(--text-main); padding-bottom: 60px; }
+    body { background: var(--bg); color: var(--text); font-family: 'Tahoma', sans-serif; margin: 0; padding: 0; }
     
-    /* Layout & Components */
-    header { background: var(--bg-surface); padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-    .brand { font-size: 24px; font-weight: 900; color: var(--accent); }
-    .main-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px; }
+    /* Layout */
+    .app-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    header { border-bottom: 1px solid var(--border); padding: 20px 0; display: flex; justify-content: space-between; }
+    .card { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
     
-    /* Buttons & Inputs */
-    .btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
-    .btn-secondary { background: #2a2a2a; border: 1px solid var(--border); color: #fff; }
-    .form-control { background: #2b2b2b; border: 1px solid var(--border); color: #fff; padding: 10px; width: 100%; border-radius: 8px; }
+    /* UI Elements */
+    .btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .input-field { background: #000; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 6px; width: 100%; }
+    
+    /* Stars */
+    .stars { cursor: pointer; font-size: 24px; color: #444; }
+    .stars .active { color: #ffc107; }
     
     /* Modals */
-    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 300; display: none; justify-content: center; align-items: center; }
-    .modal-backdrop.active { display: flex; }
-    .modal-box { background: #1c1c1c; border: 1px solid var(--border); border-radius: 16px; width: 90%; max-width: 600px; padding: 25px; max-height: 90vh; overflow-y: auto; }
-    
-    /* Stars Rating */
-    .stars-rating { display: flex; gap: 5px; font-size: 24px; cursor: pointer; color: #555; }
-    .stars-rating span.active { color: #ffc107; }
-    
-    /* Text Area */
-    .notes-area { width: 100%; height: 300px; background: #000; color: #fff; border: 1px solid var(--border); padding: 15px; border-radius: 8px; }
+    .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+    .modal.active { display: flex; }
+    .modal-box { background: #1c1c1c; padding: 30px; border-radius: 16px; width: 90%; max-width: 600px; }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="brand">🎬 CineTrack AI Ultimate</div>
-  <div style="display: flex; gap: 10px;">
-    <button class="btn btn-secondary" onclick="openNotesModal()">📝 یادداشت‌ها</button>
-    <button class="btn btn-secondary" onclick="openSettingsModal()">⚙️ تنظیمات</button>
-  </div>
-</header>
-
-<main class="main-grid" id="mainGrid"></main>
-
-<div class="modal-backdrop" id="notesModal">
-  <div class="modal-box">
-    <h3>📝 یادداشت‌ها و ضبط صدا</h3>
-    <textarea id="generalNotesTextArea" class="notes-area" oninput="saveNotes(this.value)"></textarea>
-    <div style="margin-top: 15px; display:flex; gap: 10px;">
-      <button class="btn" onclick="startVoiceDictation()">🎤 شروع ضبط صدا</button>
-      <button class="btn btn-secondary" onclick="closeModal('notesModal')">بستن</button>
+<div class="app-container">
+  <header>
+    <h1>🎬 CineTrack Premium</h1>
+    <div>
+      <button class="btn" onclick="openModal('notesModal')">📝 یادداشت‌ها</button>
+      <button class="btn" style="background:#444" onclick="openModal('settingsModal')">⚙️ تنظیمات</button>
     </div>
+  </header>
+
+  <div class="card">
+    <h3>جستجو در منبع: <span style="color:var(--primary)">film2cinemaha</span></h3>
+    <input type="text" id="searchInput" class="input-field" placeholder="مثال: Breaking Bad S01E01">
+    <button class="btn" style="margin-top:10px" onclick="searchSource()">جستجو در آرشیو</button>
+  </div>
+
+  <div id="resultsArea" class="card" style="display:none;"></div>
+</div>
+
+<div id="notesModal" class="modal">
+  <div class="modal-box">
+    <h3>یادداشت‌ها</h3>
+    <textarea id="notesArea" class="input-field" style="height:200px;"></textarea>
+    <button class="btn" onclick="startVoice()">🎤 ضبط صدا</button>
+    <button class="btn" style="background:#555" onclick="closeModal('notesModal')">بستن</button>
   </div>
 </div>
 
-<div class="modal-backdrop" id="addModal">
+<div id="settingsModal" class="modal">
   <div class="modal-box">
-    <h3>ثبت امتیاز برای اثر</h3>
-    <div class="stars-rating" id="modalStars">
-      <span onclick="setStarsValue(1)">★</span>
-      <span onclick="setStarsValue(2)">★</span>
-      <span onclick="setStarsValue(3)">★</span>
-      <span onclick="setStarsValue(4)">★</span>
-      <span onclick="setStarsValue(5)">★</span>
-    </div>
-    <input type="hidden" id="formRating" value="0">
-    <button class="btn" style="width:100%; margin-top:20px;" onclick="saveRating()">ذخیره</button>
-  </div>
-</div>
-
-<div class="modal-backdrop" id="settingsModal">
-  <div class="modal-box">
-    <h3>⚙️ تنظیمات سیستم</h3>
-    <div style="margin-top:20px;">
-      <label>آدرس سایت مرجع برای Parser:</label>
-      <input type="url" id="settingsRefUrl" class="form-control" value="https://dls2.film2cinemaha.top/DonyayeSerial/donyaye_serial_all_archive.html">
-    </div>
-    <button class="btn" style="width:100%; margin-top:20px;" onclick="saveSettings()">ذخیره</button>
+    <h3>تنظیمات</h3>
+    <label>آدرس منبع (Source URL):</label>
+    <input type="text" id="sourceUrlInput" class="input-field" value="https://dls2.film2cinemaha.top/DonyayeSerial/donyaye_serial_all_archive.html">
+    <p style="font-size:12px; color:var(--muted)">نکته: در صورت خطای CORS، از یک افزونه "Allow CORS" در مرورگر استفاده کنید.</p>
+    <button class="btn" onclick="saveSettings()">ذخیره</button>
   </div>
 </div>
 
 <script>
-  /* ================= Initialization ================= */
-  let state = {
-    items: JSON.parse(localStorage.getItem("cinetrack_db") || "[]"),
-    notes: localStorage.getItem("cinetrack_general_notes") || "",
-    refUrl: localStorage.getItem("cinetrack_ref_url") || "https://dls2.film2cinemaha.top/DonyayeSerial/donyaye_serial_all_archive.html"
+  // سیستم دیتابیس لوکال
+  const App = {
+    settings: {
+      url: localStorage.getItem('sourceUrl') || "https://dls2.film2cinemaha.top/DonyayeSerial/donyaye_serial_all_archive.html"
+    },
+    
+    // Parser اصلی (موتور جستجو)
+    async search() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const resultsArea = document.getElementById('resultsArea');
+      resultsArea.style.display = 'block';
+      resultsArea.innerHTML = "در حال جستجو در منبع...";
+
+      try {
+        // فچ کردن منبع
+        const response = await fetch(App.settings.url);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const links = Array.from(doc.querySelectorAll('a'));
+
+        const filtered = links.filter(link => {
+          const text = link.innerText.toLowerCase();
+          const href = link.href.toLowerCase();
+          return (text.includes(query) || href.includes(query));
+        });
+
+        if(filtered.length === 0) {
+          resultsArea.innerHTML = "موردی یافت نشد.";
+        } else {
+          resultsArea.innerHTML = "<h4>نتایج:</h4>";
+          filtered.slice(0, 10).forEach(link => {
+            const a = document.createElement('a');
+            a.href = link.href;
+            a.innerText = link.innerText;
+            a.target = "_blank";
+            a.style.display = "block";
+            a.style.color = "white";
+            a.style.padding = "10px";
+            resultsArea.appendChild(a);
+          });
+        }
+      } catch(e) {
+        resultsArea.innerHTML = "خطای اتصال: " + e.message + ". <br> (احتمالاً به دلیل CORS، لطفاً افزونه Allow CORS را در مرورگر فعال کنید)";
+      }
+    }
   };
 
-  function init() {
-    document.getElementById("generalNotesTextArea").value = state.notes;
-    document.getElementById("settingsRefUrl").value = state.refUrl;
-  }
-
-  /* ================= Notes & Voice (RESTORED) ================= */
-  function startVoiceDictation() {
-    if (!('webkitSpeechRecognition' in window)) {
-      alert("مرورگر شما از قابلیت ضبط صدا پشتیبانی نمی‌کند.");
-      return;
-    }
+  // ضبط صدا
+  function startVoice() {
+    if(!('webkitSpeechRecognition' in window)) { alert("مرورگر شما پشتیبانی نمی‌کند"); return; }
     const rec = new webkitSpeechRecognition();
     rec.lang = 'fa-IR';
-    rec.continuous = false;
     rec.onresult = (e) => {
-      const text = e.results[0][0].transcript;
-      const area = document.getElementById('generalNotesTextArea');
-      area.value += " " + text;
-      saveNotes(area.value);
+      document.getElementById('notesArea').value += e.results[0][0].transcript;
     };
     rec.start();
   }
 
-  function saveNotes(val) {
-    state.notes = val;
-    localStorage.setItem("cinetrack_general_notes", val);
-  }
-
-  /* ================= Rating System (RESTORED) ================= */
-  function setStarsValue(rating) {
-    document.getElementById("formRating").value = rating;
-    document.querySelectorAll("#modalStars span").forEach((star, index) => {
-      star.className = index < rating ? "active" : "";
-    });
-  }
-
-  function saveRating() {
-    const val = document.getElementById("formRating").value;
-    alert("امتیاز " + val + " ستاره ذخیره شد.");
-    closeModal('addModal');
-  }
-
-  /* ================= Parser Logic (Link Resolver) ================= */
-  async function resolveEpisodeLink(season, episode, title) {
-    try {
-      const response = await fetch(state.refUrl);
-      const html = await response.text();
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const links = Array.from(doc.querySelectorAll('a'));
-
-      const matches = links.filter(a => {
-        const text = (a.innerText + a.href).toLowerCase();
-        // جستجوی هوشمند برای فصل و قسمت
-        const sMatch = text.includes(`s${season.toString().padStart(2, '0')}`) || text.includes(`season ${season}`);
-        const eMatch = text.includes(`e${episode.toString().padStart(2, '0')}`) || text.includes(`episode ${episode}`);
-        return sMatch && eMatch;
-      });
-
-      if (matches.length > 0) {
-        window.open(matches[0].href, '_blank');
-      } else {
-        alert("لینک دقیق یافت نشد. منبع آرشیو را بررسی کنید.");
-      }
-    } catch (e) {
-      alert("خطای شبکه یا عدم دسترسی به منبع: " + e.message);
-    }
-  }
-
-  /* ================= Utils ================= */
-  function openNotesModal() { document.getElementById("notesModal").classList.add("active"); }
-  function openSettingsModal() { document.getElementById("settingsModal").classList.add("active"); }
-  function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+  // مدیریت مودال
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
   
   function saveSettings() {
-    state.refUrl = document.getElementById("settingsRefUrl").value;
-    localStorage.setItem("cinetrack_ref_url", state.refUrl);
-    alert("تنظیمات با موفقیت ذخیره شد.");
+    App.settings.url = document.getElementById('sourceUrlInput').value;
+    localStorage.setItem('sourceUrl', App.settings.url);
+    alert('ذخیره شد');
     closeModal('settingsModal');
   }
 
-  window.onload = init;
+  function searchSource() { App.search(); }
 </script>
 
 </body>
