@@ -27,10 +27,8 @@
       --radius-sm: 12px;
     }
 
-    /* FIX: removed "transition: all" from * — was a major perf bottleneck */
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; }
 
-    /* Targeted transitions only on interactive elements */
     .btn, .btn-secondary, .btn-delete, .btn-stream, .btn-stream-next,
     .filter-btn, .movie-card, .search-item, .voice-rec-btn,
     .load-more-btn { transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
@@ -310,7 +308,6 @@
     }
     .load-more-btn:hover { background: rgba(255,255,255,0.08); }
 
-    /* ===================== TOAST ===================== */
     .toast {
       position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
       background: rgba(21,24,41,0.97); border: 1px solid var(--glass-border);
@@ -324,7 +321,6 @@
     .toast.toast-error   { border-color: rgba(239,68,68,0.5);  }
     .toast.toast-info    { border-color: rgba(96,165,250,0.5);  }
 
-    /* ===================== AI FLOATING CHAT ===================== */
     .ai-float-btn {
       position: fixed; bottom: 28px; right: 28px;
       width: 58px; height: 58px; border-radius: 50%;
@@ -613,7 +609,6 @@
           <div id="archiveUploadStatus" style="font-size:12px; color:#fbbf24; margin-top:10px;"></div>
         </div>
       </div>
-      <!-- NEW: Backup archive link section -->
       <div style="border-top: 1px solid var(--glass-border); margin: 24px 0 16px; padding-top: 18px;">
         <p style="font-size: 14px; color: var(--cyan); margin-bottom: 14px; font-weight:bold;">🔗 آرشیو پشتیبان (لینک)</p>
         <div class="form-group">
@@ -1298,20 +1293,7 @@
       });
     }
 
-    async function searchWithAI(item, allLinks) {
-      const linkList   = allLinks.slice(0, 500).map((l, i) => `${i}: [${l.text.slice(0,80)}] ${l.url.slice(0,150)}`).join('\n');
-      const sysPrompt  = `You are a precise download-link matcher. Return ONLY comma-separated indices of links belonging EXACTLY to the given title. If nothing matches, output NONE. No explanation.`;
-      const userText   = `Title: "${item.title}"\nIMDb ID: ${item.id}\nYear: ${item.year}\nType: ${item.type === 'series' ? 'TV Series' : 'Movie'}\n\nLinks:\n${linkList}`;
-      try {
-        const answer = (await callAIAPI(sysPrompt, userText)).trim();
-        if (/^none$/i.test(answer) || !answer) return [];
-        const indices = answer.split(/[\s,،]+/).map(n => parseInt(n)).filter(n => !isNaN(n) && n >= 0 && n < allLinks.length);
-        return indices.map(i => allLinks[i]);
-      } catch (e) { console.error("AI link search failed:", e); }
-      return null;
-    }
-
-    // MODIFIED: added fallback to backup archive link when no matches found
+    // NOTE: The AI step (stage 4) has been completely removed.
     async function matchAndExtractLinks(imdbID) {
       const item       = state.items.find(i => i.id === imdbID);
       const resultsDiv = document.getElementById("archiveMatchResults");
@@ -1327,7 +1309,7 @@
       }
 
       function stageMsg(n, msg) {
-        resultsDiv.innerHTML = `<div class="stage-indicator"><div class="stage-spinner"></div><span>مرحله ${n} از ۴ — ${msg}</span></div>`;
+        resultsDiv.innerHTML = `<div class="stage-indicator"><div class="stage-spinner"></div><span>مرحله ${n} از ۳ — ${msg}</span></div>`;
       }
 
       const allLinks = getAllArchiveLinks();
@@ -1348,29 +1330,18 @@
       matches = searchByTitleOnly(allLinks, item.title);
       if (matches.length) return renderExtractedLinks(matches, item, resultsDiv, `🔤 یافت‌شده با نام: <b>${item.title}</b>`);
 
-      stageMsg('۴', 'هیچ نتیجه‌ای یافت نشد — مشورت با هوش مصنوعی...');
-      await tick();
-      const aiResult = await searchWithAI(item, allLinks);
-      if (aiResult === null) {
-        resultsDiv.innerHTML = `<div style="background:rgba(239,68,68,0.06);border:1px solid #f87171;padding:15px;border-radius:12px;font-size:14px;color:#ef4444;">⚠️ ارتباط با هوش مصنوعی ممکن نیست.</div>`;
-        return;
+      // No AI step here anymore – directly show "no links" + optional backup archive button
+      const backupUrl = localStorage.getItem("cinetrack_backup_archive_url");
+      if (backupUrl && backupUrl.trim().length > 5) {
+        resultsDiv.innerHTML = `
+          <div style="background:rgba(245,158,11,0.08);border:1px solid #f59e0b;padding:18px;border-radius:16px;text-align:center;">
+            <div style="font-size:16px;margin-bottom:12px;">⚠️ هیچ لینکی برای <b>${item.title}</b> در فایل آپلودی یافت نشد.</div>
+            <div style="margin-bottom:16px;color:var(--text-secondary);">آیا می‌خواهید آرشیو پشتیبان را باز کنید؟</div>
+            <button class="btn btn-stream" onclick="window.open('${backupUrl.replace(/'/g, "\\'")}', '_blank')">🔗 باز کردن آرشیو پشتیبان</button>
+          </div>`;
+      } else {
+        resultsDiv.innerHTML = `<div style="background:rgba(239,68,68,0.06);border:1px solid #f87171;padding:15px;border-radius:12px;font-size:14px;color:#ef4444;">⚠️ هیچ لینکی برای <b>${item.title}</b> یافت نشد. (لینک پشتیبان در تنظیمات ثبت نشده)</div>`;
       }
-      if (!aiResult.length) {
-        // FALLBACK: No links found -> offer to open backup archive link if set
-        const backupUrl = localStorage.getItem("cinetrack_backup_archive_url");
-        if (backupUrl && backupUrl.trim().length > 5) {
-          resultsDiv.innerHTML = `
-            <div style="background:rgba(245,158,11,0.08);border:1px solid #f59e0b;padding:18px;border-radius:16px;text-align:center;">
-              <div style="font-size:16px;margin-bottom:12px;">⚠️ هیچ لینکی برای <b>${item.title}</b> در فایل آپلودی یافت نشد.</div>
-              <div style="margin-bottom:16px;color:var(--text-secondary);">آیا می‌خواهید آرشیو پشتیبان را باز کنید؟</div>
-              <button class="btn btn-stream" onclick="window.open('${backupUrl.replace(/'/g, "\\'")}', '_blank')">🔗 باز کردن آرشیو پشتیبان</button>
-            </div>`;
-        } else {
-          resultsDiv.innerHTML = `<div style="background:rgba(239,68,68,0.06);border:1px solid #f87171;padding:15px;border-radius:12px;font-size:14px;color:#ef4444;">⚠️ هیچ لینکی برای <b>${item.title}</b> یافت نشد. (لینک پشتیبان در تنظیمات ثبت نشده)</div>`;
-        }
-        return;
-      }
-      renderExtractedLinks(aiResult, item, resultsDiv, `🤖 یافت‌شده توسط هوش مصنوعی`);
     }
 
     function tick() { return new Promise(r => setTimeout(r, 0)); }
@@ -1750,7 +1721,6 @@
     function saveGeneralNotes(v) { localStorage.setItem("cinetrack_general_notes", v); }
     function openSettingsModal() {
       document.getElementById("settingsModal").classList.add("active");
-      // Load existing backup archive URL into input
       const savedUrl = localStorage.getItem("cinetrack_backup_archive_url") || "";
       const urlInput = document.getElementById("backupArchiveUrlInput");
       if (urlInput) urlInput.value = savedUrl;
@@ -1760,7 +1730,6 @@
       const lang     = document.getElementById("uiLanguageSetting").value;
       state.uiLanguage = lang;
       localStorage.setItem("cinetrack_ui_lang", lang);
-      // Save backup archive URL
       const backupUrl = document.getElementById("backupArchiveUrlInput").value.trim();
       if (backupUrl) localStorage.setItem("cinetrack_backup_archive_url", backupUrl);
       else localStorage.removeItem("cinetrack_backup_archive_url");
@@ -1773,7 +1742,6 @@
       document.getElementById(id)?.classList.remove("active");
     }
 
-    // Close modals on backdrop click
     document.addEventListener('click', function(e) {
       if (e.target.classList.contains('modal-backdrop')) {
         e.target.classList.remove('active');
