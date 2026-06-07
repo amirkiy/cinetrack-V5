@@ -1270,44 +1270,61 @@
       })).filter(l => l.url && l.url.length > 5);
     }
 
-    async function fetchOnlineArchive(url) {
-      // If already cached, return it
-      if (state.onlineArchiveUrl === url && state.onlineArchiveContent) {
-        return state.onlineArchiveContent;
-      }
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const html = await res.text();
-      if (!html || html.trim().length === 0) throw new Error("Empty response");
-      // Cache it
-      state.onlineArchiveContent = html;
-      state.onlineArchiveUrl = url;
-      return html;
-    }
+const CORS_PROXY = 'https://corsproxy.io/?';
 
-    async function testOnlineArchive() {
-      const urlInput = document.getElementById("onlineArchiveUrlInput");
-      const statusEl = document.getElementById("onlineArchiveStatus");
-      const url = urlInput?.value.trim();
-      if (!url) {
-        statusEl.style.color = '#ef4444';
-        statusEl.textContent = "❌ لطفاً یک URL وارد کنید.";
-        return;
-      }
-      statusEl.style.color = '#fbbf24';
-      statusEl.textContent = "⏳ در حال fetch...";
-      try {
-        const html = await fetchOnlineArchive(url);
-        const links = getLinksFromHtml(html);
-        statusEl.style.color = '#10b981';
-        statusEl.textContent = `✅ دریافت شد: ${Math.round(html.length / 1024)} KB, ${links.length} لینک`;
-        showToast("✅ آرشیو آنلاین با موفقیت fetch شد.", 'success');
-      } catch (err) {
-        statusEl.style.color = '#ef4444';
-        statusEl.textContent = `❌ خطا: ${err.message}`;
-        showToast(`❌ خطا در fetch: ${err.message}`, 'error');
-      }
-    }
+async function fetchOnlineArchive(url) {
+  if (state.onlineArchiveUrl === url && state.onlineArchiveContent) {
+    return state.onlineArchiveContent;
+  }
+  async function tryFetch(fetchUrl) {
+    const res = await fetch(fetchUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const html = await res.text();
+    if (!html || html.trim().length === 0) throw new Error("Empty response");
+    return html;
+  }
+  try {
+    const html = await tryFetch(url);
+    state.onlineArchiveContent = html;
+    state.onlineArchiveUrl = url;
+    return html;
+  } catch (directErr) {
+    console.warn("Direct fetch failed, trying CORS proxy...", directErr);
+  }
+  try {
+    const proxiedUrl = CORS_PROXY + encodeURIComponent(url);
+    const html = await tryFetch(proxiedUrl);
+    state.onlineArchiveContent = html;
+    state.onlineArchiveUrl = url;
+    return html;
+  } catch (proxyErr) {
+    throw new Error(`Fetch failed (direct & proxy): ${proxyErr.message}`);
+  }
+}
+
+async function testOnlineArchive() {
+  const urlInput = document.getElementById("onlineArchiveUrlInput");
+  const statusEl = document.getElementById("onlineArchiveStatus");
+  const url = urlInput?.value.trim();
+  if (!url) {
+    statusEl.style.color = '#ef4444';
+    statusEl.textContent = "❌ لطفاً یک URL وارد کنید.";
+    return;
+  }
+  statusEl.style.color = '#fbbf24';
+  statusEl.textContent = "⏳ در حال fetch (مستقیم)...";
+  try {
+    const html = await fetchOnlineArchive(url);
+    const links = getLinksFromHtml(html);
+    statusEl.style.color = '#10b981';
+    statusEl.textContent = `✅ دریافت شد: ${Math.round(html.length / 1024)} KB, ${links.length} لینک`;
+    showToast("✅ آرشیو آنلاین با موفقیت fetch شد.", 'success');
+  } catch (err) {
+    statusEl.style.color = '#ef4444';
+    statusEl.textContent = `❌ خطا: ${err.message}`;
+    showToast(`❌ خطا در fetch: ${err.message}`, 'error');
+  }
+}
 
     // ==================== ARCHIVE LINK SEARCH ====================
     function getAllArchiveLinks() {
