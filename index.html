@@ -664,7 +664,7 @@
   <script>
     // ==================== API CONFIGURATION ====================
     const OMDB_KEY    = "4b0254f3";
-    const AI_API_BASE = "https://api.avalai.ir/v1";
+    const AI_API_BASE = "https://openrouter.ai/api/v1";
     const AI_API_KEY  = "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";
     const AI_MODEL    = "openrouter/free";
 
@@ -776,21 +776,33 @@
     async function callAIAPIWithMessages(messages, temperature = 0.7) {
       const key     = AI_API_KEY.trim();
       const baseUrl = AI_API_BASE.replace(/\/+$/, "");
-      if (!key || key === "your-avalai-api-key-here") {
-        throw new Error("⚠️ لطفاً کلید API آوالای را در متغیر AI_API_KEY تنظیم کنید.");
+      if (!key || key === "your-openrouter-api-key-here") {
+        throw new Error("⚠️ لطفاً کلید API را در متغیر AI_API_KEY تنظیم کنید.");
       }
       const res = await fetch(`${baseUrl}/chat/completions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${key}` },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${key}`,
+          "HTTP-Referer": location.href,
+          "X-Title": "CineTrack AI"
+        },
         body: JSON.stringify({ model: AI_MODEL, messages, temperature, max_tokens: 1500 })
       });
-      if (res.status === 401) throw new Error("❌ کلید API نامعتبر است.");
       if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`خطای HTTP ${res.status}: ${txt.slice(0, 100)}`);
+        let errMsg = `خطای HTTP ${res.status}`;
+        try {
+          const errData = await res.json();
+          errMsg += `: ${errData?.error?.message || errData?.message || JSON.stringify(errData).slice(0, 120)}`;
+        } catch (_) {
+          const txt = await res.text().catch(() => "");
+          if (txt) errMsg += `: ${txt.slice(0, 120)}`;
+        }
+        throw new Error(errMsg);
       }
       const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      if (!data.choices || !data.choices.length) throw new Error("پاسخ دریافتی از API فاقد محتوا بود.");
       return data.choices[0].message.content;
     }
 
