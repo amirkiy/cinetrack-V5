@@ -1270,7 +1270,13 @@
       })).filter(l => l.url && l.url.length > 5);
     }
 
-const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXIES = [
+  'https://api.allorigins.win/raw?url=',          // often fast
+  'https://corsproxy.io/?',                       // sometimes down
+  'https://cors-anywhere.herokuapp.com/',          // needs activation, but try
+  'https://api.codetabs.com/v1/proxy?quest='      // simple & reliable
+];
+
 
 async function fetchOnlineArchive(url) {
   if (state.onlineArchiveUrl === url && state.onlineArchiveContent) {
