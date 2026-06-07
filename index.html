@@ -1270,6 +1270,7 @@
       })).filter(l => l.url && l.url.length > 5);
     }
 
+// List of CORS proxies (fallback order)
 const CORS_PROXIES = [
   'https://api.allorigins.win/raw?url=',          // often fast
   'https://corsproxy.io/?',                       // sometimes down
@@ -1277,35 +1278,59 @@ const CORS_PROXIES = [
   'https://api.codetabs.com/v1/proxy?quest='      // simple & reliable
 ];
 
-
 async function fetchOnlineArchive(url) {
+  // If already cached, return it
   if (state.onlineArchiveUrl === url && state.onlineArchiveContent) {
     return state.onlineArchiveContent;
   }
-  async function tryFetch(fetchUrl) {
-    const res = await fetch(fetchUrl);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const html = await res.text();
-    if (!html || html.trim().length === 0) throw new Error("Empty response");
-    return html;
+
+  // Helper to perform a single fetch attempt
+  async function tryFetch(fetchUrl, timeout = 15000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const res = await fetch(fetchUrl, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const html = await res.text();
+      if (!html || html.trim().length === 0) throw new Error("Empty response");
+      return html;
+    } catch (err) {
+      clearTimeout(timer);
+      throw err;
+    }
   }
+
+  // 1. Direct attempt first (fastest if server allows CORS)
   try {
-    const html = await tryFetch(url);
+    const html = await tryFetch(url, 10000);
     state.onlineArchiveContent = html;
     state.onlineArchiveUrl = url;
     return html;
   } catch (directErr) {
-    console.warn("Direct fetch failed, trying CORS proxy...", directErr);
+    console.warn("Direct fetch failed, trying CORS proxies...", directErr);
   }
-  try {
-    const proxiedUrl = CORS_PROXY + encodeURIComponent(url);
-    const html = await tryFetch(proxiedUrl);
-    state.onlineArchiveContent = html;
-    state.onlineArchiveUrl = url;
-    return html;
-  } catch (proxyErr) {
-    throw new Error(`Fetch failed (direct & proxy): ${proxyErr.message}`);
+
+  // 2. Try each proxy in order
+  let lastError = null;
+  for (const proxyBase of CORS_PROXIES) {
+    try {
+      const proxiedUrl = proxyBase + encodeURIComponent(url);
+      console.log(`Trying proxy: ${proxyBase}`);
+      const html = await tryFetch(proxiedUrl);
+      // Success – cache and return
+      state.onlineArchiveContent = html;
+      state.onlineArchiveUrl = url;
+      return html;
+    } catch (proxyErr) {
+      console.warn(`Proxy ${proxyBase} failed:`, proxyErr.message);
+      lastError = proxyErr;
+      // Continue to next proxy
+    }
   }
+
+  // If we get here, all proxies failed
+  throw new Error(`All proxies failed. Last error: ${lastError?.message || 'unknown'}`);
 }
 
 async function testOnlineArchive() {
